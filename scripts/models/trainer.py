@@ -5,8 +5,7 @@ import torch
 
 def train(num_epochs, model: nn.Module, loss_func, optimizer, train_loader, val_loader):
   train_losses = []
-  test_losses = []
-  model.train()
+  test_losses = []  
 
   # Train through epoches
   for epoch in range(num_epochs):
