@@ -1,5 +1,6 @@
 import matplotlib.image as mpimg
 from torch.utils.data import Dataset, DataLoader
+from scripts.utils.img import to_class
 import os
 
 class SataDataset(Dataset):
