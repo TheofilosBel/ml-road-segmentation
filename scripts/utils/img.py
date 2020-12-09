@@ -7,7 +7,7 @@ def img_crop(im, w, h):
   '''
   list_patches = []
   imgheight = im.shape[1]
-  imgwidth = im.shape[2]    
+  imgwidth = im.shape[2]
   for i in range(0,imgheight,h):
     for j in range(0,imgwidth,w):
       patch = transforms.functional.crop(im, i, j, h, w)
