@@ -3,3 +3,6 @@ data/unzip
 
 # Don't upload saved models
 cache
+
+# Dont uppload 
+*.pyc 
