@@ -1,2 +1,5 @@
-# dont upload unzipped data
+# Don't upload unzipped data
 data/unzip
+
+# Don't upload saved models
+cache
