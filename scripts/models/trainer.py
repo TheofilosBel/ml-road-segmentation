@@ -12,9 +12,9 @@ def train(num_epochs, model: nn.Module, loss_func, optimizer, train_loader, val_
     model.train()
     avg_lost_batch = 0
     for batch_x, batch_y in train_loader:      
-      # Stack the batches to one tensor and wrap them to Variables
-      x_train = Variable( torch.cat( [a for a in batch_x ]) )
-      y_train = Variable( torch.cat( [a for a in batch_y ]) )     
+      # Stack the batches to one tensor and wrap them to Variables      
+      x_train = Variable(batch_x)
+      y_train = Variable(batch_y)     
       
       # Tranfer data to cuda if present
       if torch.cuda.is_available():
@@ -23,7 +23,7 @@ def train(num_epochs, model: nn.Module, loss_func, optimizer, train_loader, val_
       # Clear the gradients and compute the updated weights
       optimizer.zero_grad()
 
-      # predict
+      # predict      
       pred_out = model(x_train)      
             
       # find loss      
@@ -49,18 +49,17 @@ def train(num_epochs, model: nn.Module, loss_func, optimizer, train_loader, val_
           
           # Tranfer data to cuda if present
           if torch.cuda.is_available():
-            x_test, y_test = x_test.cuda().squeeze(0), y_test.cuda().squeeze(0)
+            x_test, y_test = x_test.cuda(), y_test.cuda()
 
           # predict & softmax
           pred_out = model(x_test)
           soft = nn.Softmax(dim=1)
+          pred_out = soft(pred_out.cpu().detach())
+          y_test = y_test.cpu().detach()       
 
-          pred_out = soft( pred_out.cpu().detach() )
-          y_test = y_test.cpu().detach()          
-
-          # find loss and f1
+          # find loss and f1          
           loss_test += loss_func(pred_out, y_test)
-          metric += f1_score(y_test, pred_out[:,1]>0.5 )
+          metric += f1_score(y_test.flatten(), (pred_out[:,1]>0.5).flatten())
 
         # Store loss
         test_losses.append(loss_test/len(val_loader))

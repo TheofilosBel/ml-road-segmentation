@@ -6,7 +6,7 @@ import os
 from typing import Dict
 
 
-def save(model: nn.Module, optimizer, path: str='./cache/', **opt_args):
+def save(model: nn.Module, optimizer, name_specifier: str=None, path: str='./cache/', **opt_args):
   ''' Save the model's state to the directory specified by `path`
 
       ## Parameters:
@@ -33,13 +33,16 @@ def save(model: nn.Module, optimizer, path: str='./cache/', **opt_args):
     model_dict = dict(model_dict, **opt_args)
 
   # Create the name of the file based on the model + optimizer
-  file_name = model.__class__.__name__ + '_' + optimizer.__class__.__name__ 
+  if name_specifier != None:
+    file_name = model.__class__.__name__ + '_' + optimizer.__class__.__name__ + '_' + name_specifier + '.pt'
+  else:
+    file_name = model.__class__.__name__ + '_' + optimizer.__class__.__name__ + '.pt'
 
   # Save the model
   torch.save(model_dict, os.path.join(path, file_name))  
 
 
-def load(model: nn.Module, optimizer, path: str='./cache/') -> Dict:
+def load(model: nn.Module, optimizer=None, name_specifier: str=None, path: str='./cache/') -> Dict:
   ''' Load the model's state from the directory specified by `path`
       The load function will complain if model was saved using other
       otimizers or it was a different type o model
@@ -54,21 +57,31 @@ def load(model: nn.Module, optimizer, path: str='./cache/') -> Dict:
        * A dictionarry with other stats contained to the checkpoint loaded, 
          If not existing return None
   '''
-  # Model and optimizer check
+  # Create possible model name
   saved_models = os.listdir(path)
-  model_prefix = model.__class__.__name__ + '_' + optimizer.__class__.__name__
+  specifiers = [model.__class__.__name__]
+  if optimizer != None:
+    specifiers.append(optimizer.__class__.__name__)
+  if name_specifier != None:        
+    specifiers.append(name_specifier)
+ 
   model_file_name = None
   for model_name in saved_models:
-    if model_prefix in model_name:
+    found_all = 0
+    for spec in specifiers:    
+      if spec in model_name:
+        found_all+=1
+    if found_all == len(specifiers):
       model_file_name = model_name
   
   # if not found then return and complain
   if model_file_name == None:
-    raise Exception(f'Model "{model_prefix}" not found')
+    raise Exception(f'Model with specifiers:"{specifiers}" not found')
   else:    
     checkpoint = torch.load(os.path.join(path, model_file_name))
     model.load_state_dict(checkpoint['model_state_dict'])
-    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    if optimizer != None:
+      optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     dev = checkpoint['model_device']
     
     # To cuda if vailable    
