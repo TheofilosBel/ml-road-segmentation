@@ -26,7 +26,6 @@ def save(model: nn.Module, optimizer, name_specifier: str=None, path: str='./cac
     model_dict['model_device'] = 'cuda'
   else:
     model_dict['model_device'] = 'cpu'
-
       
   # Concatanate it with opt_args if any
   if len(opt_args) != 0:
@@ -78,7 +77,12 @@ def load(model: nn.Module, optimizer=None, name_specifier: str=None, path: str='
   if model_file_name == None:
     raise Exception(f'Model with specifiers:"{specifiers}" not found')
   else:    
-    checkpoint = torch.load(os.path.join(path, model_file_name))
+    # Load checkpoint on cpu or gpu
+    if torch.cuda.is_available():
+      checkpoint = torch.load(os.path.join(path, model_file_name))
+    else:
+      checkpoint = torch.load(os.path.join(path, model_file_name), map_location=torch.device('cpu'))
+
     model.load_state_dict(checkpoint['model_state_dict'])
     if optimizer != None:
       optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
@@ -89,8 +93,7 @@ def load(model: nn.Module, optimizer=None, name_specifier: str=None, path: str='
       if torch.cuda.is_available():
         model.to(torch.device("cuda"))        
       else:
-        print("[INF] Model was used in cuda, but now it's not available")
-
+        print("[INF] Model was saved in cuda mode, but now it's loaded in cpu")
 
     # Return a dict with other stats if they exist
     checkpoint.pop('model_state_dict')

@@ -48,6 +48,7 @@ class UNet(nn.Module):
       nn.ReLU(inplace=True),
     )
 
+
   def up_trans(self, in_channels, out_channels):
     """Upsampling operation"""
     return nn.ConvTranspose2d(in_channels, out_channels, kernel_size=2, stride=2)
@@ -76,3 +77,14 @@ class UNet(nn.Module):
     x = self.out(x)
 
     return x
+
+        
+  def pred(self, img, img_trans):
+    self.eval()
+    img = img_trans(img).unsqueeze(0)
+    if torch.cuda.is_available():
+      img = img.cuda()
+    out = self.forward(img).cpu().detach()
+    soft = nn.Softmax(dim=1)
+    out_proba = soft(out)    
+    return (out_proba[:,1] > 0.5).float()

@@ -3,7 +3,12 @@ import torchvision.transforms as transforms
 
 # Crops a tensor
 def img_crop(im, w, h):
-  ''' im: Tensors of shape [C, H, W]
+  ''' 
+    ## Params:
+     * im: Tensors of shape [C, H, W]
+
+    ## Returns:
+     * Tensor of size [PatchesNum, C, H, W]
   '''
   list_patches = []
   imgheight = im.shape[1]
