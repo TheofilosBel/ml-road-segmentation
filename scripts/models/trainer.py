@@ -3,7 +3,7 @@ from torch.autograd import Variable
 import torch.nn as nn
 import torch
 
-def train(num_epochs, model: nn.Module, loss_func, optimizer, train_loader, val_loader):
+def train(num_epochs, model: nn.Module, loss_func, optimizer, train_loader, val_loader, val_logg_freq):
   train_losses = []
   test_losses = []  
 
@@ -36,14 +36,14 @@ def train(num_epochs, model: nn.Module, loss_func, optimizer, train_loader, val_
     train_losses.append(avg_lost_batch/len(train_loader))
 
     # logging prgoress and validating 
-    if epoch % 10 == 9 or epoch == 0:
-      print(f'Epoch: {epoch+1:3d} train_loss: {avg_lost_batch/len(train_loader):.2f}',  end='')
+    if epoch % 10 == (val_logg_freq-1) or epoch == 0 or epoch == num_epochs:
+      print(f'Epoch: {epoch+1:3d} train_loss: {train_losses[-1]:.2f}', end='')
 
       # Test the model
       model.eval()
       loss_test = 0
       metric = 0
-      with torch.no_grad():          
+      with torch.no_grad():
         for batch_x, batch_y in val_loader: # Batch size 1
           x_test, y_test = Variable(batch_x), Variable(batch_y)
           
@@ -59,7 +59,7 @@ def train(num_epochs, model: nn.Module, loss_func, optimizer, train_loader, val_
 
           # find loss and f1          
           loss_test += loss_func(pred_out, y_test)
-          metric += f1_score(y_test.flatten(), (pred_out[:,1]>0.5).flatten())
+          metric += f1_score(y_test.flatten(), (pred_out[:,1]>0.5).int().flatten())
 
         # Store loss
         test_losses.append(loss_test/len(val_loader))

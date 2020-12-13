@@ -53,3 +53,27 @@ def create_submissions(model, file_name):
     predicted_map.append((prediction, int(num)))
 
   masks_to_submission(file_name, predicted_map, 0.25)
+
+
+
+def img_to_patches(im, foreground_threshold):
+  """Reads a single image and outputs
+      the strings that should go into the submission file
+
+      # Params:
+      * im: tensor of size [C,H,W]
+  """
+  patched_img = torch.zeros((im.shape[1],im.shape[2]))
+  patch_size = 16
+  for j in range(0, im.shape[2], patch_size):
+    for i in range(0, im.shape[1], patch_size):
+      patch = im[:, i:i + patch_size, j:j + patch_size]
+      label = patch_to_label(patch, foreground_threshold)
+      patched_img[i:i + patch_size, j:j + patch_size] = label
+  return patched_img
+      
+
+
+
+
+

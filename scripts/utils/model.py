@@ -62,14 +62,17 @@ def load(model: nn.Module, optimizer=None, name_specifier: str=None, path: str='
   if optimizer != None:
     specifiers.append(optimizer.__class__.__name__)
   if name_specifier != None:        
-    specifiers.append(name_specifier)
+    specifiers.extend(name_specifier.split('_'))
  
   model_file_name = None
-  for model_name in saved_models:
+  for model_name in saved_models:    
     found_all = 0
-    for spec in specifiers:    
-      if spec in model_name:
-        found_all+=1
+    tokens = model_name.split(".")[0].split("_")
+    for spec in specifiers:
+      for token in tokens:
+        if spec == token:          
+          found_all+=1
+          break
     if found_all == len(specifiers):
       model_file_name = model_name
   
