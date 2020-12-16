@@ -14,9 +14,9 @@ class UNet(nn.Module):
 
     # Downsampling phase
     self.down_1 = self.double_conv(in_channels, 64)
-    self.down_2 = self.double_conv(64, 128)
-    self.down_3 = self.double_conv(128, 256)
-    self.down_4 = self.double_conv(256, 512)
+    self.down_2 = self.double_conv(64, 128, 0.2)
+    self.down_3 = self.double_conv(128, 256, 0.2)
+    self.down_4 = self.double_conv(256, 512, 0.2)
     self.down_5 = self.double_conv(512, 1024)
 
     # Upsampling phase
@@ -24,30 +24,30 @@ class UNet(nn.Module):
     self.up_1 = self.double_conv(1024, 512)
 
     self.up_trans_2 = self.up_trans(512, 256)
-    self.up_2 = self.double_conv(512, 256)
+    self.up_2 = self.double_conv(512, 256, 0.5)
     
     self.up_trans_3 = self.up_trans(256, 128)
-    self.up_3 = self.double_conv(256, 128)
+    self.up_3 = self.double_conv(256, 128, 0.5)
     
     self.up_trans_4 = self.up_trans(128, 64)
-    self.up_4 = self.double_conv(128, 64)
+    self.up_4 = self.double_conv(128, 64, 0.5)
 
     # Output convolution
     self.out = nn.Conv2d(64, out_channels, kernel_size=1)
 
-  def double_conv(self, in_channels, out_channels):
+  def double_conv(self, in_channels, out_channels, dropout_p=0):
     """Double convolution (each followed by a batch normalization and a ReLU)"""
     return nn.Sequential(
       # 1st convolution
-      nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1),
+      nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1, padding_mode='reflect'),
       nn.BatchNorm2d(out_channels),
       nn.ReLU(inplace=True),
+      nn.Dropout(dropout_p),
       # 2nd convolution
-      nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1),
+      nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1, padding_mode='reflect'),
       nn.BatchNorm2d(out_channels),
       nn.ReLU(inplace=True),
     )
-
 
   def up_trans(self, in_channels, out_channels):
     """Upsampling operation"""

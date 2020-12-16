@@ -1,7 +1,7 @@
 import torch.nn as nn
 
 class FCN(nn.Module):
-  def __init__(self, in_channels, out_channels):
+  def __init__(self, in_channels, out_channels, linear_len):
     super(FCN, self).__init__()
 
     self.cnn_layers = nn.Sequential(        
@@ -19,7 +19,7 @@ class FCN(nn.Module):
     )
 
     self.linear_layers = nn.Sequential(
-      nn.Linear(1024, 512),
+      nn.Linear(linear_len, 512),
       nn.ReLU(inplace=True),
       nn.Linear(512, out_channels)        
     )
@@ -27,7 +27,7 @@ class FCN(nn.Module):
   # Defining the forward pass    
   def forward(self, x):
     x = self.cnn_layers(x)
-    x = x.view(x.size(0), -1)      
+    x = x.view(x.size(0), -1)
     x = self.linear_layers(x)
     return x
     

@@ -1,10 +1,16 @@
 import matplotlib.image as mpimg
 from torch.utils.data import Dataset, DataLoader
-from scripts.utils.img import to_class
-import os
 import torch
+import torchvision.transforms as transforms
+import numpy as np
+import math
+import os
 
 class SataDataset(Dataset):
+  ''' 
+    The Datalite Dataset loads all the data egarly and applies the 
+    transformations
+  '''
   def __init__(self, img_names,  # What data to include (strings)                 
                 images_dir,      # Images path
                 gt_images_dir,   # GroundTruths paht                 
@@ -41,3 +47,24 @@ class SataDataset(Dataset):
     img = self.imgs[index]
     gt_img = self.gt_imgs[index]    
     return img, gt_img
+    
+
+  def augment_with_gaus_blur(self, percentage = 0.35):
+    '''
+      Augment the dataset with Gausian Blur.
+      Pick randomly a % of the ds, add blur and 
+      append them to the ds as new images
+    '''
+    if self.imgs == None or self.imgs.shape[0] == 0: return
+
+    # Get a random permutation of indexes in the ds
+    perms = np.random.permutation(len(self))[:math.floor(len(self) * percentage)]
+    new_imgs = list()
+    new_gt_imgs = list()
+    for idx in perms:
+      new_imgs.append(transforms.GaussianBlur(25)(self.imgs[idx].unsqueeze(0)).squeeze(0))
+      new_gt_imgs.append(self.gt_imgs[idx])
+        
+    self.imgs = torch.cat((self.imgs, torch.stack(new_imgs)), 0)  
+    self.gt_imgs= torch.cat((self.gt_imgs, torch.stack(new_gt_imgs)), 0)      
+    

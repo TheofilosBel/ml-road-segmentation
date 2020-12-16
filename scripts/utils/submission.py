@@ -5,8 +5,8 @@ import re
 import torch
 
 
-# assign a label to a patch
 def patch_to_label(patch, foreground_threshold):    
+  ''' Assign a label to a patch '''
   df = torch.mean(patch)    
   if df.item() > foreground_threshold:
     return 1

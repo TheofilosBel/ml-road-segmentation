@@ -43,9 +43,9 @@ train_dl = DataLoader(dataset = SataDataset(train_set, imgs_path, gt_imgs_path, 
 test_dl = DataLoader(dataset = SataDataset(test_set, imgs_path, gt_imgs_path, t_x, t_y), batch_size=1, shuffle=True, num_workers=0)
 
 
-###############
-# DOUBLE UNET #
-###############
+####################################
+# DOUBLE UNET with cat of real img #
+####################################
 
 # Define transofrmations
 toPil_trans = transforms.ToPILImage()
