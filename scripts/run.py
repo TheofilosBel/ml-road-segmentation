@@ -18,14 +18,12 @@ from sklearn.metrics import f1_score, recall_score, precision_score, accuracy_sc
 
 from scripts.data.dataset import SataDataset
 from scripts.data.preprocess import get_means_stds
-from scripts.data.augmentation import add_noise, get_transformations_fcn, get_transformations_unet
+from scripts.data.augmentation import get_transformations_fcn, get_transformations_unet
 from scripts.models.fcn import FCN
-from scripts.models.unet_mod import ModUnet
 from scripts.models.unet import UNet
 from scripts.models.res_unet import ResUNet
 from scripts.models.trainer import train
-from scripts.utils.model import save, load
-from scripts.utils.submission import masks_to_submission, img_to_patches
+from scripts.utils.submission import masks_to_submission
 from scripts.utils.img import crops_to_img
 
 ################
@@ -75,10 +73,12 @@ train_ds = SataDataset(train_set, imgs_path, gt_imgs_path, img_trans, gt_img_tra
 val_ds = SataDataset(test_set, imgs_path, gt_imgs_path, val_img_trans, val_gt_img_trans)
 
 # Create data loaders that break data to batches
+print(f'Loading data from "{data_root}"...')
 train_dl = DataLoader(dataset=train_ds, batch_size=5, shuffle=True, num_workers=0)
 val_dl = DataLoader(dataset=val_ds, batch_size=1, shuffle=True, num_workers=0)
 
 # Define the model to use
+print('Starting training...')
 model = UNet(3, 2)
 # model = ResUNet(3, 2)
 # model = FCN(3, 2, 1024)
