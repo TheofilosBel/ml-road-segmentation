@@ -1,3 +1,6 @@
+import torch
+import torch.nn as nn
+
 class ResUNet(nn.Module):
   """Implementation of the UNet model."""
 
