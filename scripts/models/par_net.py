@@ -5,18 +5,22 @@ from scripts.models.unet_mod import ModUnet
 
 
 class ParUnets(nn.Module):
-  """Implementation of a double unet model."""
+  '''
+    Implementation of a double unet model. Which trains them both
+    simultaneously. The one model is differs from the other in terms of
+    kernel size
+  '''
 
   def __init__(self, in_channels, out_channels):
     super(ParUnets, self).__init__()
     self.in_channels = in_channels
-    self.out_channels = out_channels    
+    self.out_channels = out_channels
 
     # Define 1st layer of Unet
     self.unet1 = UNet(in_channels, out_channels)
 
     # Define 1st layer of Unet
-    self.unet2 = Unet(in_channels, out_channels, kernel_size=5, pad=2)
+    self.unet2 = ModUnet(in_channels, out_channels, kernel_size=5, pad=2)
 
     # Output convolution
     self.out = nn.Sequential(
@@ -27,12 +31,12 @@ class ParUnets(nn.Module):
 
   def forward(self, input):
     x1 = self.unet1(input)
-    x2 = self.unet2(input)    
-    x = torch.cat((x1, x2), dim=1) # keep 2*2 channels changels    
+    x2 = self.unet2(input)
+    x = torch.cat((x1, x2), dim=1) # keep 2*2 channels changels
     x = self.out(x)
     return x
 
-        
+
   def pred(self, img, img_trans = None, normalized= True):
     ''' Predict the image & provide the correct transofmration'''
     self.eval()

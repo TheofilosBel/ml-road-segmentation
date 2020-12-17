@@ -7,23 +7,28 @@ import math
 import os
 
 class SataDataset(Dataset):
-  ''' 
-    The Datalite Dataset loads all the data egarly and applies the 
-    transformations
   '''
-  def __init__(self, img_names,  # What data to include (strings)                 
+    The Datalite Dataset loads all the data eagerly and applies the
+    transformations.
+  '''
+  def __init__(self, img_names,  # What data to include (strings)
                 images_dir,      # Images path
-                gt_images_dir,   # GroundTruths paht                 
+                gt_images_dir,   # GroundTruths paths
                 img_transform = None,
                 gt_img_transform = None):
     '''
-      Evrey transofrmation must create tensors. Also it must end up with a tensor
-      like [SomeSize, C, H, W], where somesize can be 0.
+      Create the dataset, by loading the data eagerly. It inputs the name of the images, and the dirs to load them from.
+
+      ### Important NoteL
+      Keep in mind that `image_names` should be the same for ground truth images and train images.
+
+      ### Transformations:
+      Every transformation must take as input a numpy array and create one tensor, the tensor must be of size [SomeSize, C, H, W], where somesize can be 0.
     '''
-    super().__init__()    
+    super().__init__()
     self.imgs    = [mpimg.imread( os.path.join(images_dir, img_name) ) for img_name in img_names]
-    self.gt_imgs = [mpimg.imread( os.path.join(gt_images_dir, img_name) )  for img_name in img_names]           
-    
+    self.gt_imgs = [mpimg.imread( os.path.join(gt_images_dir, img_name) )  for img_name in img_names]
+
     if img_transform is not None:
       self.imgs = torch.stack( [img_transform(img) for img in self.imgs])
     if gt_img_transform is not None:
@@ -35,24 +40,24 @@ class SataDataset(Dataset):
         dims = (-1,) + tuple(self.imgs.shape[2:])
         self.imgs = self.imgs.view(dims)
 
-        # We imagine that the same must happen to the gt_imgs      
+        # We imagine that the same must happen to the gt_imgs
         dims = (-1,) + tuple(self.gt_imgs.shape[2:])
         self.gt_imgs = self.gt_imgs.view(dims)
 
-    
-  def __len__(self):    
+
+  def __len__(self):
     return self.imgs.shape[0]
-    
-  def __getitem__(self,index):    
+
+  def __getitem__(self,index):
     img = self.imgs[index]
-    gt_img = self.gt_imgs[index]    
+    gt_img = self.gt_imgs[index]
     return img, gt_img
-    
+
 
   def augment_with_gaus_blur(self, percentage = 0.35):
     '''
       Augment the dataset with Gausian Blur.
-      Pick randomly a % of the ds, add blur and 
+      Pick randomly a % of the ds, add blur and
       append them to the ds as new images
     '''
     if self.imgs == None or self.imgs.shape[0] == 0: return
@@ -64,7 +69,6 @@ class SataDataset(Dataset):
     for idx in perms:
       new_imgs.append(transforms.GaussianBlur(25)(self.imgs[idx].unsqueeze(0)).squeeze(0))
       new_gt_imgs.append(self.gt_imgs[idx])
-        
-    self.imgs = torch.cat((self.imgs, torch.stack(new_imgs)), 0)  
-    self.gt_imgs= torch.cat((self.gt_imgs, torch.stack(new_gt_imgs)), 0)      
-    
+
+    self.imgs = torch.cat((self.imgs, torch.stack(new_imgs)), 0)
+    self.gt_imgs= torch.cat((self.gt_imgs, torch.stack(new_gt_imgs)), 0)

@@ -2,9 +2,14 @@ import torch
 import torch.nn as nn
 
 class UNet(nn.Module):
-  """Implementation of the UNet model."""
+  '''Implementation of the UNet model.'''
 
   def __init__(self, in_channels, out_channels):
+    '''
+        ### Params:
+         * `in_channels`: The number of channels in the input kernels (input shape [Batch, in_channels, H, W])
+         * `out_channels`: The number of channels to output for each input. It's actually the number of classes for this problem.
+    '''
     super(UNet, self).__init__()
     self.in_channels = in_channels
     self.out_channels = out_channels
@@ -25,10 +30,10 @@ class UNet(nn.Module):
 
     self.up_trans_2 = self.up_trans(512, 256)
     self.up_2 = self.double_conv(512, 256, 0.5)
-    
+
     self.up_trans_3 = self.up_trans(256, 128)
     self.up_3 = self.double_conv(256, 128, 0.5)
-    
+
     self.up_trans_4 = self.up_trans(128, 64)
     self.up_4 = self.double_conv(128, 64, 0.5)
 
@@ -78,7 +83,7 @@ class UNet(nn.Module):
 
     return x
 
-        
+
   def pred(self, img, img_trans = None, normalized= True):
     self.eval()
     if img_trans != None:

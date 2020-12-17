@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 class ModUnet(nn.Module):
-  """Implementation of the Modular Unet model."""
+  '''Implementation of the Modular UNet model.'''
 
   def __init__(self, in_channels, out_channels, kernel_size=3, pad=1, dropout=True, init_c=64):
     super(ModUnet, self).__init__()
@@ -29,10 +29,10 @@ class ModUnet(nn.Module):
 
     self.up_trans_2 = self.up_trans(multi_c*8, multi_c*4)
     self.up_2 = self.double_conv(multi_c*8, multi_c*4, drop_out_p * 3)
-    
+
     self.up_trans_3 = self.up_trans(multi_c*4, multi_c*2)
     self.up_3 = self.double_conv(multi_c*4, multi_c*2, drop_out_p * 2)
-    
+
     self.up_trans_4 = self.up_trans(multi_c*2, multi_c)
     self.up_4 = self.double_conv(multi_c*2, multi_c, drop_out_p * 2)
 
@@ -47,23 +47,23 @@ class ModUnet(nn.Module):
     """Double convolution (each followed by a batch normalization and a RELU)"""
     if drop_out_p == 0:
       return nn.Sequential(
-        # 1st convolution    
+        # 1st convolution
         nn.Conv2d(in_channels, out_channels, kernel_size=self.kernel_size, padding=self.pad, padding_mode='reflect'),
         nn.BatchNorm2d(out_channels),
-        nn.ReLU(inplace=True),       
-        # 2nd convolution    
+        nn.ReLU(inplace=True),
+        # 2nd convolution
         nn.Conv2d(out_channels, out_channels, kernel_size=self.kernel_size, padding=self.pad, padding_mode='reflect'),
         nn.BatchNorm2d(out_channels),
         nn.ReLU(inplace=True),
       )
     else:
       return nn.Sequential(
-        # 1st convolution    
+        # 1st convolution
         nn.Conv2d(in_channels, out_channels, kernel_size=self.kernel_size, padding=self.pad, padding_mode='reflect'),
         nn.BatchNorm2d(out_channels),
         nn.ReLU(inplace=True),
         nn.Dropout(drop_out_p),
-        # 2nd convolution    
+        # 2nd convolution
         nn.Conv2d(out_channels, out_channels, kernel_size=self.kernel_size, padding=self.pad, padding_mode='reflect'),
         nn.BatchNorm2d(out_channels),
         nn.ReLU(inplace=True),
@@ -81,7 +81,7 @@ class ModUnet(nn.Module):
     x = self.up_trans_1(down_x5)
     x = self.up_1(torch.cat([down_x4, x], dim=1))
 
-    x = self.up_trans_2(x)    
+    x = self.up_trans_2(x)
     x = self.up_2(torch.cat([down_x3, x], dim=1))
 
     x = self.up_trans_3(x)
@@ -94,7 +94,7 @@ class ModUnet(nn.Module):
 
     return x
 
-        
+
   def pred(self, img, img_trans = None, normalized= True):
     ''' Predict the image & provide the correct transofmration'''
     self.eval()

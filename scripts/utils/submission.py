@@ -1,13 +1,12 @@
 import os
 import numpy as np
 import matplotlib.image as mpimg
-import re
 import torch
 
 
-def patch_to_label(patch, foreground_threshold):    
+def patch_to_label(patch, foreground_threshold):
   ''' Assign a label to a patch '''
-  df = torch.mean(patch)    
+  df = torch.mean(patch)
   if df.item() > foreground_threshold:
     return 1
   else:
@@ -37,25 +36,6 @@ def masks_to_submission(submission_filename, image_map, foreground_threshold):
         for s in mask_to_submission_strings(img, img_num, foreground_threshold))
 
 
-
-def create_submissions(model, file_name):
-  net.eval()
-  predicted_map = list()
-  for path, num in all_imgs_paths_map:
-    img = mpimg.imread(path)  # load
-    input = t_x(img)
-    if torch.cuda.is_available():
-      input = input.cuda()
-    out = net(input.unsqueeze(0)).cpu().detach()
-    a = nn.Softmax(dim=1)
-    out_proba = a(out)
-    prediction = (out_proba[:,1] > 0.5).float()
-    predicted_map.append((prediction, int(num)))
-
-  masks_to_submission(file_name, predicted_map, 0.25)
-
-
-
 def img_to_patches(im, foreground_threshold):
   """Reads a single image and outputs
       the strings that should go into the submission file
@@ -71,7 +51,7 @@ def img_to_patches(im, foreground_threshold):
       label = patch_to_label(patch, foreground_threshold)
       patched_img[i:i + patch_size, j:j + patch_size] = label
   return patched_img
-      
+
 
 
 
