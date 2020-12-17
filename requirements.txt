@@ -1,0 +1,5 @@
+numpy=1.18.5
+torch=1.7.0+cu101
+torchvision=0.8.1+cu101
+sklearn=0.0
+matplotlib=3.2.2 

@@ -81,8 +81,7 @@ def rotate(img, angles, center_crop_for_rot):
     ## Returns:
       * `tensor`: size of [5+len(angles), C, H, W]
   '''
-  rotations = list()
-  rotations.extend(transforms.FiveCrop(center_crop_for_rot)(img))    
+  rotations = list()  
   for angle in angles:
     t = transforms.Compose([      
       transforms.Lambda(lambda tensor: transforms.functional.rotate(tensor, angle)),  

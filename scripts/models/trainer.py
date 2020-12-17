@@ -5,9 +5,9 @@ import numpy as np
 import torch
 
 def train(num_epochs, model: nn.Module,\
- loss_func, optimizer, lr_scheduler,\
+ loss_func, optimizer,\
  train_loader, val_loader,\
- val_logg_freq, opt_decay_freq,\
+ val_logg_freq,\
  metric_funtions\
  ): 
   '''
@@ -20,7 +20,6 @@ def train(num_epochs, model: nn.Module,\
   val_losses = []
   metrics = []
   logg_freq = range(0,num_epochs,val_logg_freq)
-  decay_freq = range(0,num_epochs,opt_decay_freq)
 
   # Train through epoches
   for epoch in range(num_epochs):
@@ -50,10 +49,6 @@ def train(num_epochs, model: nn.Module,\
     # Store loss
     train_losses.append(avg_lost_batch/len(train_loader))
 
-    # Weight decay
-    if epoch in decay_freq:
-      lr_scheduler.step()
-
     # logging prgoress and validating 
     if epoch in logg_freq or epoch == num_epochs-1:      
       print(f'Epoch: {epoch:3d}/{num_epochs} train_loss: {train_losses[-1]:.2f}', end='')
@@ -72,14 +67,13 @@ def train(num_epochs, model: nn.Module,\
               x_test, y_test = x_test.cuda(), y_test.cuda()
 
             # predict & softmax
-            pred_out = model(x_test)
+            pred_out = model(x_test)            
             soft = nn.Softmax(dim=1)
             pred_out = soft(pred_out.cpu().detach())
             y_test = y_test.cpu().detach()       
 
             # find loss and f1          
-            avg_loss_val += loss_func(pred_out, y_test)
-
+            avg_loss_val += loss_func(pred_out, y_test)            
             for idx, func in enumerate(metric_funtions):
               metrics_avg[idx] += func(y_test.flatten(), (pred_out[:,1]>0.5).int().flatten())
 

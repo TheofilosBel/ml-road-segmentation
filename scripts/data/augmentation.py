@@ -82,6 +82,24 @@ def get_transformations_fcn(
   ])
   return img_trans, img_gt_trans
 
+def rotate_crop(img, rotations, crop_size):  
+  crops = None
+  rotated_tensor = None
+  if crop_size != None:
+    crops = transforms.FiveCrop(crop_size)(img)
+  if rotations != None:
+    rotated_tensor = rotate(img, rotations, crop_size)
+
+  if crop_size != None and rotations!= None:
+    return torch.cat((rotated_tensor, torch.stack(crops)))
+  elif crop_size != None:
+    return torch.stack(crops)
+  elif rotations != None:
+    return rotated_tensor
+  else:
+    return img
+
+
 def get_transformations_unet(     \
   img_means= None, img_stds= None, \
   rotations= [45, -30, 25],  \
@@ -98,12 +116,12 @@ def get_transformations_unet(     \
   '''  
   img_trans = transforms.Compose([
     transforms.ToTensor(),
-    transforms.Lambda(lambda img: transforms.Normalize(img_means, img_stds)(img) if img_means != None else img),
-    transforms.Lambda(lambda img: rotate(img, rotations, center_crop_for_rot) if rotations != None else img)
+    transforms.Lambda(lambda img: transforms.Normalize(img_means, img_stds)(img) if img_means != None else img),    
+    transforms.Lambda(lambda img: rotate_crop(img, rotations, center_crop_for_rot))
   ])
   img_gt_trans = transforms.Compose([
     transforms.ToTensor(),
-    transforms.Lambda(lambda img: rotate(img, rotations, center_crop_for_rot) if rotations != None else img),
-    transforms.Lambda(lambda tensor: ((tensor.squeeze(1) if rotations != None else tensor.squeeze(0)) >0.25).long())
+    transforms.Lambda(lambda img: rotate_crop(img, rotations, center_crop_for_rot)),
+    transforms.Lambda(lambda tensor: ((tensor.squeeze(1) if (rotations != None or center_crop_for_rot != None) else tensor.squeeze(0)) >0.25).long())
   ])
   return img_trans, img_gt_trans

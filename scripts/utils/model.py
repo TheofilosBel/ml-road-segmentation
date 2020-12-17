@@ -88,6 +88,7 @@ def load(model: nn.Module, optimizer=None, name_specifier: str=None, path: str='
 
     model.load_state_dict(checkpoint['model_state_dict'])
     if optimizer != None:
+      print(checkpoint['optimizer_state_dict'])
       optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     dev = checkpoint['model_device']
     
